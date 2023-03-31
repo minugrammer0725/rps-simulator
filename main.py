@@ -1,9 +1,3 @@
-'''
-TODO:
-1) Add Start button
-2) Combine Pause/Resume into one button -> update the message
-'''
-
 from turtle import Turtle, Screen
 from random import randint
 
@@ -58,21 +52,28 @@ def onStartClick(x, y):
     for ball in balls:
         ball.dx = options[randint(0,1)]
         ball.dy = options[randint(0,1)]
+    # TODO: disable window click after game has started
+
 
 def onPauseResumeToggle(x, y):
-    pass 
-
-
-def onPauseClick(x, y):
-    for ball in balls:
-        ball.prevdx = ball.dx
-        ball.prevdy = ball.dy
-        ball.dx = 0
-        ball.dy = 0
-def onResumeClick(x,y):
-    for ball in balls:
-        ball.dx = ball.prevdx
-        ball.dy = ball.prevdy
+    # if not working, create a global variable 'paused' instead
+    pause_resume_button.clear()
+    pause_resume_button.penup()
+    pause_resume_button.goto(350, 170)
+    if pause_resume_button.paused:
+        pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
+        for ball in balls:
+            ball.dx = ball.prevdx
+            ball.dy = ball.prevdy
+    else:
+        pause_resume_button.write('Resume', align='center', font=("Courier", 18, "normal"))
+        for ball in balls:
+            ball.prevdx = ball.dx
+            ball.prevdy = ball.dy
+            ball.dx = 0
+            ball.dy = 0
+    pause_resume_button.goto(350, 150)
+    pause_resume_button.paused = not pause_resume_button.paused
 
 
 start_button = Turtle()
@@ -85,26 +86,16 @@ start_button.write('Start', align='center', font=("Courier", 18, "normal"))
 start_button.goto(350, 220)
 start_button.onclick(onStartClick)
 
-
-pause_button = Turtle()
-pause_button.shape('square')
-pause_button.shapesize(2, 3)
-pause_button.color('green')
-pause_button.penup()
-pause_button.goto(350, 170)
-pause_button.write('Pause', align='center', font=("Courier", 18, "normal"))
-pause_button.goto(350, 150)
-pause_button.onclick(onPauseClick)
-
-resume_button = Turtle()
-resume_button.shape('square')
-resume_button.shapesize(2,3)
-resume_button.color('blue')
-resume_button.penup()
-resume_button.goto(350, 100)
-resume_button.write('Resume', align='center', font=("Courier", 18, "normal"))
-resume_button.goto(350, 80)
-resume_button.onclick(onResumeClick)
+pause_resume_button = Turtle()
+pause_resume_button.shape('square')
+pause_resume_button.shapesize(2,3)
+pause_resume_button.color('green')
+pause_resume_button.penup()
+pause_resume_button.goto(350, 170)
+pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
+pause_resume_button.goto(350, 150)
+pause_resume_button.paused = False
+pause_resume_button.onclick(onPauseResumeToggle)
 
 # all balls on the screen
 balls = []

@@ -12,6 +12,12 @@ bottom_border = BALL_WIDTH/2 - SCREEN_HEIGHT/2
 right_border = SCREEN_WIDTH/2 - CONTROLS_WIDTH - BALL_WIDTH/2
 left_border = BALL_WIDTH/2 - SCREEN_WIDTH/2
 
+# all balls on the screen
+balls = []
+
+# intial dx, dy values
+options = [0.2, -0.2]
+
 def onWindowClick(x, y):
     # if (x, y) is within board borders, summon a ball
     if left_border <= x <= right_border and bottom_border <= y <= top_border:
@@ -54,6 +60,11 @@ def onStartClick(x, y):
         ball.dy = options[randint(0,1)]
     # TODO: disable window click after game has started
 
+def onStopClick(x, y):
+    for ball in balls:
+        ball.hideturtle()
+    balls.clear()
+
 
 def onPauseResumeToggle(x, y):
     # if not working, create a global variable 'paused' instead
@@ -88,7 +99,7 @@ start_button.onclick(onStartClick)
 
 pause_resume_button = Turtle()
 pause_resume_button.shape('square')
-pause_resume_button.shapesize(2,3)
+pause_resume_button.shapesize(2, 3)
 pause_resume_button.color('green')
 pause_resume_button.penup()
 pause_resume_button.goto(350, 170)
@@ -97,11 +108,16 @@ pause_resume_button.goto(350, 150)
 pause_resume_button.paused = False
 pause_resume_button.onclick(onPauseResumeToggle)
 
-# all balls on the screen
-balls = []
-
-# intial dx, dy values
-options = [0.2, -0.2]
+stop_button = Turtle()
+stop_button.shape('square')
+stop_button.shapesize(2, 3)
+stop_button.color('red')
+stop_button.penup()
+stop_button.goto(350, 100)
+stop_button.write('Stop', align='center', font=("Courier", 18, "normal"))
+stop_button.goto(350, 80)
+stop_button.paused = False
+stop_button.onclick(onStopClick)
 
 # game loop
 while True:

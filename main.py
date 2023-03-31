@@ -1,9 +1,7 @@
 '''
 TODO:
-1) Plain canvas. One Toggle Button (or two seperate), start and pause.
-2) Next, summon the turtle objects by clicking on canvas.
-3) summon turtle by clicking on one of the buttons, THEN clicking on canvas.
-
+1) Add Start button
+2) Combine Pause/Resume into one button -> update the message
 '''
 
 from turtle import Turtle, Screen
@@ -26,8 +24,8 @@ def onWindowClick(x, y):
         ball = Turtle(shape='circle')
         ball.color('blue')
         ball.speed(0)
-        ball.dx = options[randint(0,1)]
-        ball.dy = options[randint(0,1)]
+        ball.dx = 0
+        ball.dy = 0
         ball.prevdx = 0
         ball.prevdy = 0
         ball.penup()
@@ -56,6 +54,15 @@ separator.right(90)
 separator.forward(600)
 
 # click events
+def onStartClick(x, y):
+    for ball in balls:
+        ball.dx = options[randint(0,1)]
+        ball.dy = options[randint(0,1)]
+
+def onPauseResumeToggle(x, y):
+    pass 
+
+
 def onPauseClick(x, y):
     for ball in balls:
         ball.prevdx = ball.dx
@@ -67,12 +74,24 @@ def onResumeClick(x,y):
         ball.dx = ball.prevdx
         ball.dy = ball.prevdy
 
+
+start_button = Turtle()
+start_button.shape('square')
+start_button.shapesize(2, 3)
+start_button.color('purple')
+start_button.penup()
+start_button.goto(350, 240)
+start_button.write('Start', align='center', font=("Courier", 18, "normal"))
+start_button.goto(350, 220)
+start_button.onclick(onStartClick)
+
+
 pause_button = Turtle()
 pause_button.shape('square')
 pause_button.shapesize(2, 3)
 pause_button.color('green')
 pause_button.penup()
-pause_button.goto(350, 180)
+pause_button.goto(350, 170)
 pause_button.write('Pause', align='center', font=("Courier", 18, "normal"))
 pause_button.goto(350, 150)
 pause_button.onclick(onPauseClick)
@@ -84,7 +103,7 @@ resume_button.color('blue')
 resume_button.penup()
 resume_button.goto(350, 100)
 resume_button.write('Resume', align='center', font=("Courier", 18, "normal"))
-resume_button.goto(350, 70)
+resume_button.goto(350, 80)
 resume_button.onclick(onResumeClick)
 
 # all balls on the screen
@@ -92,21 +111,6 @@ balls = []
 
 # intial dx, dy values
 options = [0.2, -0.2]
-
-# summon 5 random circles within the board
-# for i in range(5):
-#     ball = Turtle(shape='circle')
-#     ball.color('blue')
-#     ball.speed(0)
-#     ball.dx = options[randint(0,1)]
-#     ball.dy = options[randint(0,1)]
-#     ball.prevdx = 0
-#     ball.prevdy = 0
-#     x = randint(-490, 190)
-#     y = randint(-290, 290)
-#     ball.penup()
-#     ball.goto(x, y)
-#     balls.append(ball)
 
 # game loop
 while True:

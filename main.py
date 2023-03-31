@@ -6,6 +6,7 @@ SCREEN_HEIGHT = 600
 BOARD_WIDTH = 700
 CONTROLS_WIDTH = 300
 BALL_WIDTH = 20
+INIT_SPEED = 0.5
 
 top_border = SCREEN_HEIGHT/2 - BALL_WIDTH/2
 bottom_border = BALL_WIDTH/2 - SCREEN_HEIGHT/2
@@ -16,7 +17,7 @@ left_border = BALL_WIDTH/2 - SCREEN_WIDTH/2
 balls = []
 
 # intial dx, dy values
-options = [0.2, -0.2]
+options = [INIT_SPEED, -INIT_SPEED]
 
 def onWindowClick(x, y):
     # if (x, y) is within board borders, summon a ball
@@ -66,6 +67,32 @@ def onStopClick(x, y):
     balls.clear()
 
 
+def onStartStopToggle(x, y):
+    start_stop_button.clear()
+    start_stop_button.penup()
+    start_stop_button.goto(350, 240)
+    if start_stop_button.started:
+        start_stop_button.write('Start', align='center', font=("Courier", 18, "normal"))
+        for ball in balls:
+            ball.hideturtle()
+        balls.clear()
+        # after game has stopped, the pause/resume button should be pause.
+        pause_resume_button.clear()
+        pause_resume_button.penup()
+        pause_resume_button.goto(350, 170)
+        pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
+        pause_resume_button.goto(350, 150)
+        pause_resume_button.paused = False
+
+    else:
+        start_stop_button.write('Stop', align='center', font=("Courier", 18, "normal"))
+        for ball in balls:
+            ball.dx = options[randint(0,1)]
+            ball.dy = options[randint(0,1)]
+        # TODO: disable window click after game has started
+    start_stop_button.goto(350, 220)
+    start_stop_button.started = not start_stop_button.started
+
 def onPauseResumeToggle(x, y):
     # if not working, create a global variable 'paused' instead
     pause_resume_button.clear()
@@ -87,15 +114,17 @@ def onPauseResumeToggle(x, y):
     pause_resume_button.paused = not pause_resume_button.paused
 
 
-start_button = Turtle()
-start_button.shape('square')
-start_button.shapesize(2, 3)
-start_button.color('purple')
-start_button.penup()
-start_button.goto(350, 240)
-start_button.write('Start', align='center', font=("Courier", 18, "normal"))
-start_button.goto(350, 220)
-start_button.onclick(onStartClick)
+start_stop_button = Turtle()
+start_stop_button.shape('square')
+start_stop_button.shapesize(2, 3)
+start_stop_button.color('purple')
+start_stop_button.penup()
+start_stop_button.goto(350, 240)
+start_stop_button.write('Start', align='center', font=("Courier", 18, "normal"))
+start_stop_button.goto(350, 220)
+start_stop_button.started = False
+start_stop_button.onclick(onStartStopToggle)
+
 
 pause_resume_button = Turtle()
 pause_resume_button.shape('square')
@@ -108,16 +137,6 @@ pause_resume_button.goto(350, 150)
 pause_resume_button.paused = False
 pause_resume_button.onclick(onPauseResumeToggle)
 
-stop_button = Turtle()
-stop_button.shape('square')
-stop_button.shapesize(2, 3)
-stop_button.color('red')
-stop_button.penup()
-stop_button.goto(350, 100)
-stop_button.write('Stop', align='center', font=("Courier", 18, "normal"))
-stop_button.goto(350, 80)
-stop_button.paused = False
-stop_button.onclick(onStopClick)
 
 # game loop
 while True:

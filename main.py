@@ -1,5 +1,6 @@
 from turtle import Turtle, Screen
 from random import randint
+from time import sleep
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 600
@@ -21,17 +22,45 @@ options = [INIT_SPEED, -INIT_SPEED]
 
 def onWindowClick(x, y):
     # if (x, y) is within board borders, summon a ball
-    if left_border <= x <= right_border and bottom_border <= y <= top_border:
-        ball = Turtle(shape='circle')
-        ball.color('blue')
-        ball.speed(0)
-        ball.dx = 0
-        ball.dy = 0
-        ball.prevdx = 0
-        ball.prevdy = 0
-        ball.penup()
-        ball.goto(x, y)
-        balls.append(ball)
+    if not(left_border <= x <= right_border and bottom_border <= y <= top_border and not start_stop_button.started):
+        return
+
+    # python match: 3.10 >
+    match wn.selected:
+        case 'rock':
+            rock = Turtle(shape='circle')
+            rock.color('red')
+            rock.speed(0)
+            rock.dx = 0
+            rock.dy = 0
+            rock.prevdx = 0
+            rock.prevdy = 0
+            rock.penup()
+            rock.goto(x, y)
+            balls.append(rock)
+        case 'paper':
+            paper = Turtle(shape='square')
+            paper.color('green')
+            paper.speed(0)
+            paper.dx = 0
+            paper.dy = 0
+            paper.prevdx = 0
+            paper.prevdy = 0
+            paper.penup()
+            paper.goto(x, y)
+            balls.append(paper)
+        case 'scissor':
+            scissor = Turtle(shape='triangle')
+            scissor.color('blue')
+            scissor.speed(0)
+            scissor.dx = 0
+            scissor.dy = 0
+            scissor.prevdx = 0
+            scissor.prevdy = 0
+            scissor.penup()
+            scissor.goto(x, y)
+            balls.append(scissor)
+    
 
 
 wn = Screen()
@@ -41,6 +70,7 @@ wn.bgcolor('#D3D3D3')
 wn.tracer(0)
 wn.listen()
 wn.onclick(onWindowClick)
+wn.selected = None
 wn._root.resizable(False, False)
  
 # draw a line for controls panel
@@ -54,34 +84,34 @@ separator.pendown()
 separator.right(90)
 separator.forward(600)
 
+
+message = Turtle()
+message.speed(0)
+message.penup()
+message.hideturtle()
+message.goto(-150, 200)
+
+
 # click events
-def onStartClick(x, y):
-    for ball in balls:
-        ball.dx = options[randint(0,1)]
-        ball.dy = options[randint(0,1)]
-    # TODO: disable window click after game has started
-
-def onStopClick(x, y):
-    for ball in balls:
-        ball.hideturtle()
-    balls.clear()
-
-
 def onStartStopToggle(x, y):
+    if len(balls) < 1:
+        message.write('Summon at least one sprite into the screen.', align="center", font=("Courier", 14, "normal"))
+        wn.ontimer(lambda: message.clear(), 2500)
+        return
     start_stop_button.clear()
     start_stop_button.penup()
-    start_stop_button.goto(350, 240)
+    start_stop_button.goto(350, 180)
     if start_stop_button.started:
         start_stop_button.write('Start', align='center', font=("Courier", 18, "normal"))
         for ball in balls:
             ball.hideturtle()
         balls.clear()
-        # after game has stopped, the pause/resume button should be pause.
+        # after game has stopped, the pause/resume button should be on pause.
         pause_resume_button.clear()
         pause_resume_button.penup()
-        pause_resume_button.goto(350, 170)
+        pause_resume_button.goto(350, 110)
         pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
-        pause_resume_button.goto(350, 150)
+        pause_resume_button.goto(350, 90)
         pause_resume_button.paused = False
 
     else:
@@ -89,15 +119,22 @@ def onStartStopToggle(x, y):
         for ball in balls:
             ball.dx = options[randint(0,1)]
             ball.dy = options[randint(0,1)]
-        # TODO: disable window click after game has started
-    start_stop_button.goto(350, 220)
+    start_stop_button.goto(350, 160)
     start_stop_button.started = not start_stop_button.started
+    # reset summon buttons
+    wn.selected = None
+    rock_button.shapesize(2.1, 2.1)
+    paper_button.shapesize(2.1, 2.1)
+    scissor_button.shapesize(2.1, 2.1)
 
 def onPauseResumeToggle(x, y):
-    # if not working, create a global variable 'paused' instead
+    if not start_stop_button.started:
+        message.write('Game has not started yet.', align="center", font=("Courier", 14, "normal"))
+        wn.ontimer(lambda: message.clear(), 2500)
+        return
     pause_resume_button.clear()
     pause_resume_button.penup()
-    pause_resume_button.goto(350, 170)
+    pause_resume_button.goto(350, 110)
     if pause_resume_button.paused:
         pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
         for ball in balls:
@@ -110,18 +147,41 @@ def onPauseResumeToggle(x, y):
             ball.prevdy = ball.dy
             ball.dx = 0
             ball.dy = 0
-    pause_resume_button.goto(350, 150)
+    pause_resume_button.goto(350, 90)
     pause_resume_button.paused = not pause_resume_button.paused
 
+def summon_rock(x, y):
+    if start_stop_button.started:
+        return
+    wn.selected = 'rock'
+    rock_button.shapesize(2.5, 2.5)
+    paper_button.shapesize(2.1,2.1)
+    scissor_button.shapesize(2.1, 2.1)
+
+def summon_paper(x, y):
+    if start_stop_button.started:
+        return
+    wn.selected = 'paper'
+    rock_button.shapesize(2.1, 2.1)
+    paper_button.shapesize(2.5,2.5)
+    scissor_button.shapesize(2.1, 2.1)
+
+def summon_scissor(x, y):
+    if start_stop_button.started:
+        return
+    wn.selected = 'scissor'
+    rock_button.shapesize(2.1, 2.1)
+    paper_button.shapesize(2.1,2.1)
+    scissor_button.shapesize(2.5, 2.5)
 
 start_stop_button = Turtle()
 start_stop_button.shape('square')
 start_stop_button.shapesize(2, 3)
 start_stop_button.color('purple')
 start_stop_button.penup()
-start_stop_button.goto(350, 240)
+start_stop_button.goto(350, 180)
 start_stop_button.write('Start', align='center', font=("Courier", 18, "normal"))
-start_stop_button.goto(350, 220)
+start_stop_button.goto(350, 160)
 start_stop_button.started = False
 start_stop_button.onclick(onStartStopToggle)
 
@@ -129,13 +189,39 @@ start_stop_button.onclick(onStartStopToggle)
 pause_resume_button = Turtle()
 pause_resume_button.shape('square')
 pause_resume_button.shapesize(2, 3)
-pause_resume_button.color('green')
+pause_resume_button.color('#624a2e')
 pause_resume_button.penup()
-pause_resume_button.goto(350, 170)
+pause_resume_button.goto(350, 110)
 pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
-pause_resume_button.goto(350, 150)
+pause_resume_button.goto(350, 90)
 pause_resume_button.paused = False
 pause_resume_button.onclick(onPauseResumeToggle)
+
+
+# rock, paper, scissor sprites
+rock_button = Turtle()
+rock_button.shape('circle')
+rock_button.shapesize(2.1, 2.1)
+rock_button.color('red')
+rock_button.penup()
+rock_button.goto(270, 240)
+rock_button.onclick(summon_rock)
+
+paper_button = Turtle()
+paper_button.shape('circle')
+paper_button.shapesize(2.1, 2.1)
+paper_button.color('green')
+paper_button.penup()
+paper_button.goto(350, 240)
+paper_button.onclick(summon_paper)
+
+scissor_button = Turtle()
+scissor_button.shape('circle')
+scissor_button.shapesize(2.1, 2.1)
+scissor_button.color('blue')
+scissor_button.penup()
+scissor_button.goto(430, 240)
+scissor_button.onclick(summon_scissor)
 
 
 # game loop

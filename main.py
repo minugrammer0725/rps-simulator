@@ -368,7 +368,10 @@ while True:
         redo_button.color('black')
     
     # game over
-    if start_stop_button.started and len(balls) <= 1:
-        # TODO: 1) Stop all balls from moving. 2) Create a restart button
+    if start_stop_button.started and len(balls) == 1:
+        # TODO: 2) Create a restart button
+        winner_ball = balls.pop()
+        winner_ball.dx = 0
+        winner_ball.dx = 0
         message.clear()
         message.write('Game Over', align='center', font=("Courier", 24, "normal"))

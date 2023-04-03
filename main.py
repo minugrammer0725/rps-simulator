@@ -60,6 +60,11 @@ def onWindowClick(x, y):
             scissor.penup()
             scissor.goto(x, y)
             balls.append(scissor)
+        case _:
+            message.clear()
+            message.write('Please select a color.', align="center", font=("Courier", 14, "normal"))
+            wn.ontimer(lambda: message.clear(), 2000)
+
     
 
 
@@ -95,6 +100,7 @@ message.goto(-150, 200)
 # click events
 def onStartStopToggle(x, y):
     if len(balls) < 1:
+        message.clear()
         message.write('Summon at least one sprite into the screen.', align="center", font=("Courier", 14, "normal"))
         wn.ontimer(lambda: message.clear(), 2500)
         return
@@ -129,6 +135,7 @@ def onStartStopToggle(x, y):
 
 def onPauseResumeToggle(x, y):
     if not start_stop_button.started:
+        message.clear()
         message.write('Game has not started yet.', align="center", font=("Courier", 14, "normal"))
         wn.ontimer(lambda: message.clear(), 2500)
         return
@@ -223,6 +230,9 @@ scissor_button.penup()
 scissor_button.goto(430, 240)
 scissor_button.onclick(summon_scissor)
 
+
+# TODO: Collision Detection using turtle.distance() and math methods..
+# def isCollision(t1, t2): return t1.distance(t2) < COLLISION_CONSTANT(i.e. 20)
 
 # game loop
 while True:

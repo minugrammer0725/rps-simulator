@@ -101,8 +101,18 @@ def onWindowClick(x, y):
             message.write('Please select a color.', align="center", font=("Courier", 14, "normal"))
             wn.ontimer(lambda: message.clear(), MESSAGE_TIMEOUT)
 
-    
+def canStart():
+    if len(balls) < 2 or notEnoughUniqueItems():
+        return False
+    return True
 
+def notEnoughUniqueItems():
+    sign = balls[0].sign
+    count = 0
+    for ball in balls:
+        if sign == ball.sign:
+            count += 1
+    return True if count == len(balls)  else False
 
 wn = Screen()
 wn.title('RPS-Simulator')
@@ -135,9 +145,9 @@ message.goto(MESSAGE_X, MESSAGE_Y)
 
 # click events
 def onStartStopToggle(x, y):
-    if len(balls) < 1:
+    if not canStart():
         message.clear()
-        message.write('Summon at least one sprite into the screen.', align="center", font=("Courier", 14, "normal"))
+        message.write('Summon at least 2 different items.', align="center", font=("Courier", 14, "normal"))
         wn.ontimer(lambda: message.clear(), MESSAGE_TIMEOUT)
         return
     start_stop_button.clear()
@@ -392,10 +402,11 @@ while True:
         redo_button.color('black')
     
     # game over
-    if start_stop_button.started and len(balls) == 1:
+    if start_stop_button.started and (len(balls) == 1 or all(b.sign == balls[0].sign for b in balls)):
+        # 
         # TODO: Create a restart button
-        winner_ball = balls.pop()
-        winner_ball.dx = 0
-        winner_ball.dx = 0
+        for ball in balls:
+            ball.dx = 0
+            ball.dy = 0
         message.clear()
         message.write('Game Over', align='center', font=("Courier", 24, "normal"))

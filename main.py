@@ -16,6 +16,8 @@ left_border = BALL_WIDTH/2 - SCREEN_WIDTH/2
 
 # all balls on the screen
 balls = []
+# copy array used for undo/redo
+copy = []
 
 # intial dx, dy values
 options = [INIT_SPEED, -INIT_SPEED]
@@ -132,6 +134,8 @@ def onStartStopToggle(x, y):
     rock_button.shapesize(2.1, 2.1)
     paper_button.shapesize(2.1, 2.1)
     scissor_button.shapesize(2.1, 2.1)
+    # empty copy array
+    copy.clear()
 
 def onPauseResumeToggle(x, y):
     if not start_stop_button.started:
@@ -180,6 +184,36 @@ def summon_scissor(x, y):
     rock_button.shapesize(2.1, 2.1)
     paper_button.shapesize(2.1,2.1)
     scissor_button.shapesize(2.5, 2.5)
+
+
+def onUndoClick(x, y):
+    # check if data arr is non-empty
+    if start_stop_button.started:
+        return 
+    if len(balls) < 1:
+        message.clear()
+        message.write('Cannot Undo.', align="center", font=("Courier", 14, "normal"))
+        wn.ontimer(lambda: message.clear(), 2000)
+        return
+    ball = balls.pop()
+    ball.hideturtle()
+    copy.append(ball)
+     
+
+def onRedoClick(x, y):
+    # check if copy arr is non-empty
+    if start_stop_button.started:
+        return 
+    if len(copy) < 1:
+        message.clear()
+        message.write('Cannot Redo.', align="center", font=("Courier", 14, "normal"))
+        wn.ontimer(lambda: message.clear(), 2000)
+        return
+    ball = copy.pop()
+    ball.showturtle() 
+    balls.append(ball)
+     
+
 
 start_stop_button = Turtle()
 start_stop_button.shape('square')
@@ -234,6 +268,36 @@ scissor_button.onclick(summon_scissor)
 # TODO: Collision Detection using turtle.distance() and math methods..
 # def isCollision(t1, t2): return t1.distance(t2) < COLLISION_CONSTANT(i.e. 20)
 
+# TODO: Undo/Redo buttons
+undo_button = Turtle()
+undo_button.shape('arrow')
+undo_button.shapesize(1, 2)
+undo_button.width(5)
+undo_button.right(180)
+undo_button.shapesize()
+undo_button.color('grey')
+undo_button.penup()
+undo_button.goto(330, -50)
+undo_button.pendown()
+undo_button.forward(20)
+undo_button.onclick(onUndoClick)
+
+
+redo_button = Turtle()
+redo_button.shape('arrow')
+redo_button.shapesize(1, 2)
+redo_button.width(5)
+redo_button.shapesize()
+redo_button.color('grey')
+redo_button.penup()
+redo_button.goto(370, -50)
+redo_button.pendown()
+redo_button.forward(20)
+redo_button.onclick(onRedoClick)
+
+
+
+
 # game loop
 while True:
     wn.update()
@@ -254,3 +318,13 @@ while True:
         elif ball.ycor() < bottom_border:
             ball.sety(bottom_border)
             ball.dy *= -1
+    
+    if len(balls) < 1 or start_stop_button.started:
+        undo_button.color('grey')
+    else:
+        undo_button.color('black')
+
+    if len(copy) < 1 or start_stop_button.started:
+        redo_button.color('grey')
+    else:
+        redo_button.color('black')

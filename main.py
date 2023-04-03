@@ -241,8 +241,20 @@ def onRedoClick(x, y):
     ball = copy.pop()
     ball.showturtle() 
     balls.append(ball)
-     
 
+
+def detectCollision():
+    indices = []
+    for i in range(len(balls)):
+        for j in range(i+1, len(balls)):
+            if balls[i].distance(balls[j]) < 10:
+                # collision
+                # TODO: Implement ROCK PAPER SCISSOR! 
+                balls[j].hideturtle()
+                indices.append(j)
+    # remove balls altogether
+    for idx in indices:
+        balls.pop(idx)
 
 start_stop_button = Turtle()
 start_stop_button.shape('square')
@@ -294,10 +306,6 @@ scissor_button.goto(SCISSOR_BTN_X, SUMMON_BTN_Y)
 scissor_button.onclick(summon_scissor)
 
 
-# TODO: Collision Detection using turtle.distance() and math methods..
-# def isCollision(t1, t2): return t1.distance(t2) < COLLISION_CONSTANT(i.e. 20)
-
-# TODO: Undo/Redo buttons
 undo_button = Turtle()
 undo_button.shape('arrow')
 undo_button.shapesize(1, 2)
@@ -347,6 +355,8 @@ while True:
             ball.sety(BOTTOM_BORDER)
             ball.dy *= -1
     
+    detectCollision()
+    
     if len(balls) < 1 or start_stop_button.started:
         undo_button.color('grey')
     else:
@@ -356,3 +366,9 @@ while True:
         redo_button.color('grey')
     else:
         redo_button.color('black')
+    
+    # game over
+    if start_stop_button.started and len(balls) <= 1:
+        # TODO: 1) Stop all balls from moving. 2) Create a restart button
+        message.clear()
+        message.write('Game Over', align='center', font=("Courier", 24, "normal"))

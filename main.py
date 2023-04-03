@@ -1,6 +1,5 @@
 from turtle import Turtle, Screen
 from random import randint
-from time import sleep
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 600
@@ -9,10 +8,40 @@ CONTROLS_WIDTH = 300
 BALL_WIDTH = 20
 INIT_SPEED = 0.5
 
-top_border = SCREEN_HEIGHT/2 - BALL_WIDTH/2
-bottom_border = BALL_WIDTH/2 - SCREEN_HEIGHT/2
-right_border = SCREEN_WIDTH/2 - CONTROLS_WIDTH - BALL_WIDTH/2
-left_border = BALL_WIDTH/2 - SCREEN_WIDTH/2
+TOP_BORDER = SCREEN_HEIGHT/2 - BALL_WIDTH/2
+BOTTOM_BORDER = BALL_WIDTH/2 - SCREEN_HEIGHT/2
+RIGHT_BORDER = SCREEN_WIDTH/2 - CONTROLS_WIDTH - BALL_WIDTH/2
+LEFT_BORDER = BALL_WIDTH/2 - SCREEN_WIDTH/2
+
+MESSAGE_TIMEOUT = 2000
+SEPARATOR_X = 200
+SEPARATOR_Y = 300
+
+MESSAGE_X = -150
+MESSAGE_Y = 200
+
+SS_BUTTON_X = 350
+SS_BUTTON_Y = 180
+SS_BUTTON_TEXT_Y = 160
+
+PR_BUTTON_X = 350 
+PR_BUTTON_Y = 110
+PR_BUTTON_TEXT_Y = 90
+
+SUMMON_BTN_SIZE = 2.1
+SUMMON_BTN_HOVER = 2.5
+SUMMON_BTN_Y = 240
+
+ROCK_BTN_X = 270
+PAPER_BTN_X = 350
+SCISSOR_BTN_X = 430
+
+UNDO_BTN_X = 330
+UNDO_BTN_Y = -50
+
+REDO_BTN_X = 370
+REDO_BTN_Y = -50
+
 
 # all balls on the screen
 balls = []
@@ -24,7 +53,7 @@ options = [INIT_SPEED, -INIT_SPEED]
 
 def onWindowClick(x, y):
     # if (x, y) is within board borders, summon a ball
-    if not(left_border <= x <= right_border and bottom_border <= y <= top_border and not start_stop_button.started):
+    if not(LEFT_BORDER <= x <= RIGHT_BORDER and BOTTOM_BORDER <= y <= TOP_BORDER and not start_stop_button.started):
         return
 
     # python match: 3.10 >
@@ -65,7 +94,7 @@ def onWindowClick(x, y):
         case _:
             message.clear()
             message.write('Please select a color.', align="center", font=("Courier", 14, "normal"))
-            wn.ontimer(lambda: message.clear(), 2000)
+            wn.ontimer(lambda: message.clear(), MESSAGE_TIMEOUT)
 
     
 
@@ -86,7 +115,7 @@ separator.color('black')
 separator.width(4)
 separator.hideturtle()
 separator.penup()
-separator.goto(200, 300)
+separator.goto(SEPARATOR_X, SEPARATOR_Y)
 separator.pendown()
 separator.right(90)
 separator.forward(600)
@@ -96,7 +125,7 @@ message = Turtle()
 message.speed(0)
 message.penup()
 message.hideturtle()
-message.goto(-150, 200)
+message.goto(MESSAGE_X, MESSAGE_Y)
 
 
 # click events
@@ -104,11 +133,11 @@ def onStartStopToggle(x, y):
     if len(balls) < 1:
         message.clear()
         message.write('Summon at least one sprite into the screen.', align="center", font=("Courier", 14, "normal"))
-        wn.ontimer(lambda: message.clear(), 2500)
+        wn.ontimer(lambda: message.clear(), MESSAGE_TIMEOUT)
         return
     start_stop_button.clear()
     start_stop_button.penup()
-    start_stop_button.goto(350, 180)
+    start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_Y)
     if start_stop_button.started:
         start_stop_button.write('Start', align='center', font=("Courier", 18, "normal"))
         for ball in balls:
@@ -117,9 +146,9 @@ def onStartStopToggle(x, y):
         # after game has stopped, the pause/resume button should be on pause.
         pause_resume_button.clear()
         pause_resume_button.penup()
-        pause_resume_button.goto(350, 110)
+        pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_Y)
         pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
-        pause_resume_button.goto(350, 90)
+        pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_TEXT_Y)
         pause_resume_button.paused = False
 
     else:
@@ -127,13 +156,13 @@ def onStartStopToggle(x, y):
         for ball in balls:
             ball.dx = options[randint(0,1)]
             ball.dy = options[randint(0,1)]
-    start_stop_button.goto(350, 160)
+    start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_TEXT_Y)
     start_stop_button.started = not start_stop_button.started
     # reset summon buttons
     wn.selected = None
-    rock_button.shapesize(2.1, 2.1)
-    paper_button.shapesize(2.1, 2.1)
-    scissor_button.shapesize(2.1, 2.1)
+    rock_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
+    paper_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
+    scissor_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
     # empty copy array
     copy.clear()
 
@@ -141,11 +170,11 @@ def onPauseResumeToggle(x, y):
     if not start_stop_button.started:
         message.clear()
         message.write('Game has not started yet.', align="center", font=("Courier", 14, "normal"))
-        wn.ontimer(lambda: message.clear(), 2500)
+        wn.ontimer(lambda: message.clear(), MESSAGE_TIMEOUT)
         return
     pause_resume_button.clear()
     pause_resume_button.penup()
-    pause_resume_button.goto(350, 110)
+    pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_Y)
     if pause_resume_button.paused:
         pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
         for ball in balls:
@@ -158,32 +187,32 @@ def onPauseResumeToggle(x, y):
             ball.prevdy = ball.dy
             ball.dx = 0
             ball.dy = 0
-    pause_resume_button.goto(350, 90)
+    pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_TEXT_Y)
     pause_resume_button.paused = not pause_resume_button.paused
 
 def summon_rock(x, y):
     if start_stop_button.started:
         return
     wn.selected = 'rock'
-    rock_button.shapesize(2.5, 2.5)
-    paper_button.shapesize(2.1,2.1)
-    scissor_button.shapesize(2.1, 2.1)
+    rock_button.shapesize(SUMMON_BTN_HOVER, SUMMON_BTN_HOVER)
+    paper_button.shapesize(SUMMON_BTN_SIZE,SUMMON_BTN_SIZE)
+    scissor_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
 
 def summon_paper(x, y):
     if start_stop_button.started:
         return
     wn.selected = 'paper'
-    rock_button.shapesize(2.1, 2.1)
-    paper_button.shapesize(2.5,2.5)
-    scissor_button.shapesize(2.1, 2.1)
+    rock_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
+    paper_button.shapesize(SUMMON_BTN_HOVER,SUMMON_BTN_HOVER)
+    scissor_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
 
 def summon_scissor(x, y):
     if start_stop_button.started:
         return
     wn.selected = 'scissor'
-    rock_button.shapesize(2.1, 2.1)
-    paper_button.shapesize(2.1,2.1)
-    scissor_button.shapesize(2.5, 2.5)
+    rock_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
+    paper_button.shapesize(SUMMON_BTN_SIZE,SUMMON_BTN_SIZE)
+    scissor_button.shapesize(SUMMON_BTN_HOVER, SUMMON_BTN_HOVER)
 
 
 def onUndoClick(x, y):
@@ -193,7 +222,7 @@ def onUndoClick(x, y):
     if len(balls) < 1:
         message.clear()
         message.write('Cannot Undo.', align="center", font=("Courier", 14, "normal"))
-        wn.ontimer(lambda: message.clear(), 2000)
+        wn.ontimer(lambda: message.clear(), MESSAGE_TIMEOUT)
         return
     ball = balls.pop()
     ball.hideturtle()
@@ -207,7 +236,7 @@ def onRedoClick(x, y):
     if len(copy) < 1:
         message.clear()
         message.write('Cannot Redo.', align="center", font=("Courier", 14, "normal"))
-        wn.ontimer(lambda: message.clear(), 2000)
+        wn.ontimer(lambda: message.clear(), MESSAGE_TIMEOUT)
         return
     ball = copy.pop()
     ball.showturtle() 
@@ -220,9 +249,9 @@ start_stop_button.shape('square')
 start_stop_button.shapesize(2, 3)
 start_stop_button.color('purple')
 start_stop_button.penup()
-start_stop_button.goto(350, 180)
+start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_Y)
 start_stop_button.write('Start', align='center', font=("Courier", 18, "normal"))
-start_stop_button.goto(350, 160)
+start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_TEXT_Y)
 start_stop_button.started = False
 start_stop_button.onclick(onStartStopToggle)
 
@@ -232,9 +261,9 @@ pause_resume_button.shape('square')
 pause_resume_button.shapesize(2, 3)
 pause_resume_button.color('#624a2e')
 pause_resume_button.penup()
-pause_resume_button.goto(350, 110)
+pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_Y)
 pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
-pause_resume_button.goto(350, 90)
+pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_TEXT_Y)
 pause_resume_button.paused = False
 pause_resume_button.onclick(onPauseResumeToggle)
 
@@ -245,7 +274,7 @@ rock_button.shape('circle')
 rock_button.shapesize(2.1, 2.1)
 rock_button.color('red')
 rock_button.penup()
-rock_button.goto(270, 240)
+rock_button.goto(ROCK_BTN_X, SUMMON_BTN_Y)
 rock_button.onclick(summon_rock)
 
 paper_button = Turtle()
@@ -253,7 +282,7 @@ paper_button.shape('circle')
 paper_button.shapesize(2.1, 2.1)
 paper_button.color('green')
 paper_button.penup()
-paper_button.goto(350, 240)
+paper_button.goto(PAPER_BTN_X, SUMMON_BTN_Y)
 paper_button.onclick(summon_paper)
 
 scissor_button = Turtle()
@@ -261,7 +290,7 @@ scissor_button.shape('circle')
 scissor_button.shapesize(2.1, 2.1)
 scissor_button.color('blue')
 scissor_button.penup()
-scissor_button.goto(430, 240)
+scissor_button.goto(SCISSOR_BTN_X, SUMMON_BTN_Y)
 scissor_button.onclick(summon_scissor)
 
 
@@ -277,7 +306,7 @@ undo_button.right(180)
 undo_button.shapesize()
 undo_button.color('grey')
 undo_button.penup()
-undo_button.goto(330, -50)
+undo_button.goto(UNDO_BTN_X, UNDO_BTN_Y)
 undo_button.pendown()
 undo_button.forward(20)
 undo_button.onclick(onUndoClick)
@@ -290,11 +319,10 @@ redo_button.width(5)
 redo_button.shapesize()
 redo_button.color('grey')
 redo_button.penup()
-redo_button.goto(370, -50)
+redo_button.goto(REDO_BTN_X, REDO_BTN_Y)
 redo_button.pendown()
 redo_button.forward(20)
 redo_button.onclick(onRedoClick)
-
 
 
 
@@ -306,17 +334,17 @@ while True:
         ball.setx(ball.xcor() + ball.dx)
         ball.sety(ball.ycor() + ball.dy)
         # check borders
-        if ball.xcor() > right_border:
-            ball.setx(right_border)
+        if ball.xcor() > RIGHT_BORDER:
+            ball.setx(RIGHT_BORDER)
             ball.dx *= -1
-        elif ball.xcor() < left_border:
-            ball.setx(left_border)
+        elif ball.xcor() < LEFT_BORDER:
+            ball.setx(LEFT_BORDER)
             ball.dx *= -1
-        if ball.ycor() > top_border:
-            ball.sety(top_border)
+        if ball.ycor() > TOP_BORDER:
+            ball.sety(TOP_BORDER)
             ball.dy *= -1
-        elif ball.ycor() < bottom_border:
-            ball.sety(bottom_border)
+        elif ball.ycor() < BOTTOM_BORDER:
+            ball.sety(BOTTOM_BORDER)
             ball.dy *= -1
     
     if len(balls) < 1 or start_stop_button.started:

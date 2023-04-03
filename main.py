@@ -8,6 +8,8 @@ CONTROLS_WIDTH = 300
 BALL_WIDTH = 20
 INIT_SPEED = 0.5
 
+COLLISION_RADIUS = 15
+
 TOP_BORDER = SCREEN_HEIGHT/2 - BALL_WIDTH/2
 BOTTOM_BORDER = BALL_WIDTH/2 - SCREEN_HEIGHT/2
 RIGHT_BORDER = SCREEN_WIDTH/2 - CONTROLS_WIDTH - BALL_WIDTH/2
@@ -247,7 +249,7 @@ def detectCollision():
     indices = []
     for i in range(len(balls)):
         for j in range(i+1, len(balls)):
-            if balls[i].distance(balls[j]) < 10:
+            if balls[i].distance(balls[j]) < COLLISION_RADIUS:
                 # collision
                 # TODO: Implement ROCK PAPER SCISSOR! 
                 balls[j].hideturtle()

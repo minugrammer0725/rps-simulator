@@ -6,7 +6,7 @@ SCREEN_HEIGHT = 600
 BOARD_WIDTH = 700
 CONTROLS_WIDTH = 300
 BALL_WIDTH = 20
-INIT_SPEED = 0.5
+INIT_SPEED = 1
 
 COLLISION_RADIUS = 15
 
@@ -15,7 +15,7 @@ BOTTOM_BORDER = BALL_WIDTH/2 - SCREEN_HEIGHT/2
 RIGHT_BORDER = SCREEN_WIDTH/2 - CONTROLS_WIDTH - BALL_WIDTH/2
 LEFT_BORDER = BALL_WIDTH/2 - SCREEN_WIDTH/2
 
-MESSAGE_TIMEOUT = 2000
+MESSAGE_TIMEOUT = 1700
 SEPARATOR_X = 200
 SEPARATOR_Y = 300
 
@@ -70,6 +70,7 @@ def onWindowClick(x, y):
             rock.prevdy = 0
             rock.penup()
             rock.goto(x, y)
+            rock.sign = 'rock'
             balls.append(rock)
         case 'paper':
             paper = Turtle(shape='square')
@@ -81,6 +82,7 @@ def onWindowClick(x, y):
             paper.prevdy = 0
             paper.penup()
             paper.goto(x, y)
+            paper.sign = 'paper'
             balls.append(paper)
         case 'scissor':
             scissor = Turtle(shape='triangle')
@@ -92,6 +94,7 @@ def onWindowClick(x, y):
             scissor.prevdy = 0
             scissor.penup()
             scissor.goto(x, y)
+            scissor.sign = 'scissor'
             balls.append(scissor)
         case _:
             message.clear()
@@ -251,9 +254,29 @@ def detectCollision():
         for j in range(i+1, len(balls)):
             if balls[i].distance(balls[j]) < COLLISION_RADIUS:
                 # collision
-                # TODO: Implement ROCK PAPER SCISSOR! 
-                balls[j].hideturtle()
-                indices.append(j)
+                opp_sign = balls[j].sign
+                match balls[i].sign:
+                    case 'rock':
+                        if opp_sign == 'paper':
+                            balls[i].hideturtle()
+                            indices.append(i) 
+                        elif opp_sign == 'scissor':
+                            balls[j].hideturtle()
+                            indices.append(j) 
+                    case 'paper':
+                        if opp_sign == 'rock':
+                            balls[j].hideturtle()
+                            indices.append(j) 
+                        elif opp_sign == 'scissor':
+                            balls[i].hideturtle()
+                            indices.append(i) 
+                    case 'scissor':
+                        if opp_sign == 'rock':
+                            balls[i].hideturtle()
+                            indices.append(i) 
+                        elif opp_sign == 'paper':
+                            balls[j].hideturtle()
+                            indices.append(j) 
     # remove balls altogether
     for idx in indices:
         balls.pop(idx)
@@ -292,7 +315,7 @@ rock_button.goto(ROCK_BTN_X, SUMMON_BTN_Y)
 rock_button.onclick(summon_rock)
 
 paper_button = Turtle()
-paper_button.shape('circle')
+paper_button.shape('square')
 paper_button.shapesize(2.1, 2.1)
 paper_button.color('green')
 paper_button.penup()
@@ -300,7 +323,7 @@ paper_button.goto(PAPER_BTN_X, SUMMON_BTN_Y)
 paper_button.onclick(summon_paper)
 
 scissor_button = Turtle()
-scissor_button.shape('circle')
+scissor_button.shape('triangle')
 scissor_button.shapesize(2.1, 2.1)
 scissor_button.color('blue')
 scissor_button.penup()
@@ -333,7 +356,6 @@ redo_button.goto(REDO_BTN_X, REDO_BTN_Y)
 redo_button.pendown()
 redo_button.forward(20)
 redo_button.onclick(onRedoClick)
-
 
 
 # game loop
@@ -371,7 +393,7 @@ while True:
     
     # game over
     if start_stop_button.started and len(balls) == 1:
-        # TODO: 2) Create a restart button
+        # TODO: Create a restart button
         winner_ball = balls.pop()
         winner_ball.dx = 0
         winner_ball.dx = 0

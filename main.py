@@ -317,30 +317,10 @@ rock_button = Button('circle', SUMMON_BTN_SIZE, SUMMON_BTN_SIZE, 'red', ROCK_BTN
 paper_button = Button('square', SUMMON_BTN_SIZE, SUMMON_BTN_SIZE, 'green', PAPER_BTN_X, SUMMON_BTN_Y, summon_paper)
 scissor_button = Button('triangle', SUMMON_BTN_SIZE, SUMMON_BTN_SIZE, 'blue', SCISSOR_BTN_X, SUMMON_BTN_Y, summon_scissor)
 
-
-undo_button = Turtle()
-undo_button.shape('arrow')
-undo_button.shapesize(1, 2)
-undo_button.width(5)
-undo_button.right(180)
-undo_button.color('grey')
-undo_button.penup()
-undo_button.goto(UNDO_BTN_X, UNDO_BTN_Y)
-undo_button.pendown()
-undo_button.forward(20)
-undo_button.onclick(onUndoClick)
+undo_button = ReverseButton('arrow', 1, 2, 'grey', UNDO_BTN_X, UNDO_BTN_Y, onUndoClick, 180, 5)
 
 
-redo_button = Turtle()
-redo_button.shape('arrow')
-redo_button.shapesize(1, 2)
-redo_button.width(5)
-redo_button.color('grey')
-redo_button.penup()
-redo_button.goto(REDO_BTN_X, REDO_BTN_Y)
-redo_button.pendown()
-redo_button.forward(20)
-redo_button.onclick(onRedoClick)
+redo_button = ReverseButton('arrow', 1, 2, 'grey', REDO_BTN_X, REDO_BTN_Y, onRedoClick, 0, 5)
 
 
 # game loop

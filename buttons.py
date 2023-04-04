@@ -21,6 +21,8 @@ class ControlButton(Button):
 class ReverseButton(Button):
     def __init__(self, shape, wid, len, color, x, y, onclick, angle, width):
         super().__init__(shape, wid, len, color, x, y, onclick)
-        self.right(angle)
         self.width(width)
+        self.pendown()
+        self.right(angle)
+        self.forward(20) 
 

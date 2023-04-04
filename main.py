@@ -2,6 +2,7 @@ from turtle import Turtle, Screen
 from random import randint
 
 from separator import Separator
+from message import Message
 from buttons import Button, ControlButton, ReverseButton
 
 SCREEN_WIDTH = 1000
@@ -59,7 +60,7 @@ options = [INIT_SPEED, -INIT_SPEED]
 
 def onWindowClick(x, y):
     # if (x, y) is within board borders, summon a ball
-    if not(LEFT_BORDER <= x <= RIGHT_BORDER and BOTTOM_BORDER <= y <= TOP_BORDER and not start_stop_button.started):
+    if not(LEFT_BORDER <= x <= RIGHT_BORDER and BOTTOM_BORDER <= y <= TOP_BORDER and not start_stop_button.toggle):
         return
 
     # python match: 3.10 >
@@ -101,9 +102,7 @@ def onWindowClick(x, y):
             scissor.sign = 'scissor'
             balls.append(scissor)
         case _:
-            message.clear()
-            message.write('Please select a color.', align="center", font=("Courier", 14, "normal"))
-            wn.ontimer(lambda: message.clear(), MESSAGE_TIMEOUT)
+            message.writeMessage('Please Select a Color', wn, MESSAGE_TIMEOUT)
 
 def canStart():
     if len(balls) < 2 or notEnoughUniqueItems():
@@ -118,6 +117,7 @@ def notEnoughUniqueItems():
             count += 1
     return True if count == len(balls)  else False
 
+
 wn = Screen()
 wn.title('RPS-Simulator')
 wn.setup(width=SCREEN_WIDTH, height=SCREEN_HEIGHT)
@@ -130,26 +130,19 @@ wn._root.resizable(False, False)
  
 # separator component to divide game board and controls
 separator = Separator(SEPARATOR_X, SEPARATOR_Y, 'yellow', 4, SCREEN_HEIGHT)
-
-
-message = Turtle()
-message.speed(0)
-message.penup()
-message.hideturtle()
-message.goto(MESSAGE_X, MESSAGE_Y)
+# message component to alert user
+message = Message(0, MESSAGE_X, MESSAGE_Y)
 
 
 # click events
 def onStartStopToggle(x, y):
     if not canStart():
-        message.clear()
-        message.write('Summon at least 2 different items.', align="center", font=("Courier", 14, "normal"))
-        wn.ontimer(lambda: message.clear(), MESSAGE_TIMEOUT)
+        message.writeMessage('Summon at least 2 different items', wn, MESSAGE_TIMEOUT)
         return
     start_stop_button.clear()
     start_stop_button.penup()
     start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_TEXT_Y)
-    if start_stop_button.started:
+    if start_stop_button.toggle:
         start_stop_button.write('Start', align='center', font=("Courier", 18, "normal"))
         for ball in balls:
             ball.hideturtle()
@@ -160,16 +153,16 @@ def onStartStopToggle(x, y):
         pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_TEXT_Y)
         pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
         pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_Y)
-        pause_resume_button.paused = False
+        pause_resume_button.toggle = False
 
     else:
-        message.clear()
+        message.clearMessage()
         start_stop_button.write('Stop', align='center', font=("Courier", 18, "normal"))
         for ball in balls:
             ball.dx = options[randint(0,1)]
             ball.dy = options[randint(0,1)]
     start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_Y)
-    start_stop_button.started = not start_stop_button.started
+    start_stop_button.toggle = not start_stop_button.toggle
     # reset summon buttons
     wn.selected = None
     rock_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
@@ -179,15 +172,13 @@ def onStartStopToggle(x, y):
     copy.clear()
 
 def onPauseResumeToggle(x, y):
-    if not start_stop_button.started:
-        message.clear()
-        message.write('Game has not started yet.', align="center", font=("Courier", 14, "normal"))
-        wn.ontimer(lambda: message.clear(), MESSAGE_TIMEOUT)
+    if not start_stop_button.toggle:
+        message.writeMessage('Game has not started yet', wn, MESSAGE_TIMEOUT)
         return
     pause_resume_button.clear()
     pause_resume_button.penup()
     pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_TEXT_Y)
-    if pause_resume_button.paused:
+    if pause_resume_button.toggle:
         pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
         for ball in balls:
             ball.dx = ball.prevdx
@@ -200,10 +191,10 @@ def onPauseResumeToggle(x, y):
             ball.dx = 0
             ball.dy = 0
     pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_Y)
-    pause_resume_button.paused = not pause_resume_button.paused
+    pause_resume_button.toggle = not pause_resume_button.toggle
 
 def summon_rock(x, y):
-    if start_stop_button.started:
+    if start_stop_button.toggle:
         return
     wn.selected = 'rock'
     rock_button.shapesize(SUMMON_BTN_HOVER, SUMMON_BTN_HOVER)
@@ -211,7 +202,7 @@ def summon_rock(x, y):
     scissor_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
 
 def summon_paper(x, y):
-    if start_stop_button.started:
+    if start_stop_button.toggle:
         return
     wn.selected = 'paper'
     rock_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
@@ -219,7 +210,7 @@ def summon_paper(x, y):
     scissor_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
 
 def summon_scissor(x, y):
-    if start_stop_button.started:
+    if start_stop_button.toggle:
         return
     wn.selected = 'scissor'
     rock_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
@@ -229,12 +220,10 @@ def summon_scissor(x, y):
 
 def onUndoClick(x, y):
     # check if data arr is non-empty
-    if start_stop_button.started:
+    if start_stop_button.toggle:
         return 
     if len(balls) < 1:
-        message.clear()
-        message.write('Cannot Undo.', align="center", font=("Courier", 14, "normal"))
-        wn.ontimer(lambda: message.clear(), MESSAGE_TIMEOUT)
+        message.writeMessage('Cannot Undo', wn, MESSAGE_TIMEOUT)
         return
     ball = balls.pop()
     ball.hideturtle()
@@ -243,12 +232,10 @@ def onUndoClick(x, y):
 
 def onRedoClick(x, y):
     # check if copy arr is non-empty
-    if start_stop_button.started:
+    if start_stop_button.toggle:
         return 
     if len(copy) < 1:
-        message.clear()
-        message.write('Cannot Redo.', align="center", font=("Courier", 14, "normal"))
-        wn.ontimer(lambda: message.clear(), MESSAGE_TIMEOUT)
+        message.writeMessage('Cannot Redo', wn, MESSAGE_TIMEOUT)
         return
     ball = copy.pop()
     ball.showturtle() 
@@ -288,38 +275,15 @@ def detectCollision():
     for idx in indices:
         balls.pop(idx)
 
-start_stop_button = Turtle()
-start_stop_button.shape('square')
-start_stop_button.shapesize(2, 3)
-start_stop_button.color('purple')
-start_stop_button.penup()
-start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_TEXT_Y)
-start_stop_button.write('Start', align='center', font=("Courier", 18, "normal"))
-start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_Y)
-start_stop_button.started = False
-start_stop_button.onclick(onStartStopToggle)
-
-
-pause_resume_button = Turtle()
-pause_resume_button.shape('square')
-pause_resume_button.shapesize(2, 3)
-pause_resume_button.color('#624a2e')
-pause_resume_button.penup()
-pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_TEXT_Y)
-pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
-pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_Y)
-pause_resume_button.paused = False
-pause_resume_button.onclick(onPauseResumeToggle)
-
-
 # buttons
+start_stop_button = ControlButton('Start', 'square', 2, 3, 'purple', SS_BUTTON_X, SS_BUTTON_Y, SS_BUTTON_TEXT_Y, onStartStopToggle)
+pause_resume_button = ControlButton('Pause', 'square', 2, 3, '#624a2e', PR_BUTTON_X, PR_BUTTON_Y, PR_BUTTON_TEXT_Y, onPauseResumeToggle)
+
 rock_button = Button('circle', SUMMON_BTN_SIZE, SUMMON_BTN_SIZE, 'red', ROCK_BTN_X, SUMMON_BTN_Y, summon_rock)
 paper_button = Button('square', SUMMON_BTN_SIZE, SUMMON_BTN_SIZE, 'green', PAPER_BTN_X, SUMMON_BTN_Y, summon_paper)
 scissor_button = Button('triangle', SUMMON_BTN_SIZE, SUMMON_BTN_SIZE, 'blue', SCISSOR_BTN_X, SUMMON_BTN_Y, summon_scissor)
 
 undo_button = ReverseButton('arrow', 1, 2, 'grey', UNDO_BTN_X, UNDO_BTN_Y, onUndoClick, 180, 5)
-
-
 redo_button = ReverseButton('arrow', 1, 2, 'grey', REDO_BTN_X, REDO_BTN_Y, onRedoClick, 0, 5)
 
 
@@ -346,22 +310,21 @@ while True:
     
     detectCollision()
     
-    if len(balls) < 1 or start_stop_button.started:
+    if len(balls) < 1 or start_stop_button.toggle:
         undo_button.color('grey')
     else:
         undo_button.color('black')
 
-    if len(copy) < 1 or start_stop_button.started:
+    if len(copy) < 1 or start_stop_button.toggle:
         redo_button.color('grey')
     else:
         redo_button.color('black')
     
     # game over
-    if start_stop_button.started and (len(balls) == 1 or all(b.sign == balls[0].sign for b in balls)):
+    if start_stop_button.toggle and (len(balls) == 1 or all(b.sign == balls[0].sign for b in balls)):
         # 
         # TODO: Create a restart button
         for ball in balls:
             ball.dx = 0
             ball.dy = 0
-        message.clear()
-        message.write('Game Over', align='center', font=("Courier", 24, "normal"))
+        message.gameOver()

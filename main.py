@@ -312,30 +312,10 @@ pause_resume_button.paused = False
 pause_resume_button.onclick(onPauseResumeToggle)
 
 
-# rock, paper, scissor sprites
-rock_button = Turtle()
-rock_button.shape('circle')
-rock_button.shapesize(2.1, 2.1)
-rock_button.color('red')
-rock_button.penup()
-rock_button.goto(ROCK_BTN_X, SUMMON_BTN_Y)
-rock_button.onclick(summon_rock)
-
-paper_button = Turtle()
-paper_button.shape('square')
-paper_button.shapesize(2.1, 2.1)
-paper_button.color('green')
-paper_button.penup()
-paper_button.goto(PAPER_BTN_X, SUMMON_BTN_Y)
-paper_button.onclick(summon_paper)
-
-scissor_button = Turtle()
-scissor_button.shape('triangle')
-scissor_button.shapesize(2.1, 2.1)
-scissor_button.color('blue')
-scissor_button.penup()
-scissor_button.goto(SCISSOR_BTN_X, SUMMON_BTN_Y)
-scissor_button.onclick(summon_scissor)
+# buttons
+rock_button = Button('circle', SUMMON_BTN_SIZE, SUMMON_BTN_SIZE, 'red', ROCK_BTN_X, SUMMON_BTN_Y, summon_rock)
+paper_button = Button('square', SUMMON_BTN_SIZE, SUMMON_BTN_SIZE, 'green', PAPER_BTN_X, SUMMON_BTN_Y, summon_paper)
+scissor_button = Button('triangle', SUMMON_BTN_SIZE, SUMMON_BTN_SIZE, 'blue', SCISSOR_BTN_X, SUMMON_BTN_Y, summon_scissor)
 
 
 undo_button = Turtle()

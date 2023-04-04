@@ -3,21 +3,22 @@ from random import randint
 
 from separator import Separator
 from message import Message
+from sprite import Sprite
 from buttons import Button, ControlButton, ReverseButton
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 600
 BOARD_WIDTH = 700
 CONTROLS_WIDTH = 300
-BALL_WIDTH = 20
+SPRITE_WIDTH = 20
 INIT_SPEED = 1
 
 COLLISION_RADIUS = 15
 
-TOP_BORDER = SCREEN_HEIGHT/2 - BALL_WIDTH/2
-BOTTOM_BORDER = BALL_WIDTH/2 - SCREEN_HEIGHT/2
-RIGHT_BORDER = SCREEN_WIDTH/2 - CONTROLS_WIDTH - BALL_WIDTH/2
-LEFT_BORDER = BALL_WIDTH/2 - SCREEN_WIDTH/2
+TOP_BORDER = SCREEN_HEIGHT/2 - SPRITE_WIDTH/2
+BOTTOM_BORDER = SPRITE_WIDTH/2 - SCREEN_HEIGHT/2
+RIGHT_BORDER = SCREEN_WIDTH/2 - CONTROLS_WIDTH - SPRITE_WIDTH/2
+LEFT_BORDER = SPRITE_WIDTH/2 - SCREEN_WIDTH/2
 
 MESSAGE_TIMEOUT = 1700
 
@@ -50,8 +51,8 @@ REDO_BTN_X = 370
 REDO_BTN_Y = -50
 
 
-# all balls on the screen
-balls = []
+# all sprites on the screen
+sprites = []
 # copy array used for undo/redo
 copy = []
 
@@ -59,63 +60,36 @@ copy = []
 options = [INIT_SPEED, -INIT_SPEED]
 
 def onWindowClick(x, y):
-    # if (x, y) is within board borders, summon a ball
+    # if (x, y) is within board borders, summon a sprite
     if not(LEFT_BORDER <= x <= RIGHT_BORDER and BOTTOM_BORDER <= y <= TOP_BORDER and not start_stop_button.toggle):
         return
 
     # python match: 3.10 >
     match wn.selected:
         case 'rock':
-            rock = Turtle(shape='circle')
-            rock.color('red')
-            rock.speed(0)
-            rock.dx = 0
-            rock.dy = 0
-            rock.prevdx = 0
-            rock.prevdy = 0
-            rock.penup()
-            rock.goto(x, y)
-            rock.sign = 'rock'
-            balls.append(rock)
+            rock = Sprite('circle', 'red', x, y, 'rock')
+            sprites.append(rock)
         case 'paper':
-            paper = Turtle(shape='square')
-            paper.color('green')
-            paper.speed(0)
-            paper.dx = 0
-            paper.dy = 0
-            paper.prevdx = 0
-            paper.prevdy = 0
-            paper.penup()
-            paper.goto(x, y)
-            paper.sign = 'paper'
-            balls.append(paper)
+            paper = Sprite('square', 'green', x, y, 'paper')
+            sprites.append(paper)
         case 'scissor':
-            scissor = Turtle(shape='triangle')
-            scissor.color('blue')
-            scissor.speed(0)
-            scissor.dx = 0
-            scissor.dy = 0
-            scissor.prevdx = 0
-            scissor.prevdy = 0
-            scissor.penup()
-            scissor.goto(x, y)
-            scissor.sign = 'scissor'
-            balls.append(scissor)
+            scissor = Sprite('triangle', 'blue', x, y, 'scissor')
+            sprites.append(scissor)
         case _:
             message.writeMessage('Please Select a Color', wn, MESSAGE_TIMEOUT)
 
 def canStart():
-    if len(balls) < 2 or notEnoughUniqueItems():
+    if len(sprites) < 2 or notEnoughUniqueItems():
         return False
     return True
 
 def notEnoughUniqueItems():
-    sign = balls[0].sign
+    sign = sprites[0].sign
     count = 0
-    for ball in balls:
-        if sign == ball.sign:
+    for sprite in sprites:
+        if sign == sprite.sign:
             count += 1
-    return True if count == len(balls)  else False
+    return True if count == len(sprites)  else False
 
 
 wn = Screen()
@@ -144,9 +118,9 @@ def onStartStopToggle(x, y):
     start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_TEXT_Y)
     if start_stop_button.toggle:
         start_stop_button.write('Start', align='center', font=("Courier", 18, "normal"))
-        for ball in balls:
-            ball.hideturtle()
-        balls.clear()
+        for sprite in sprites:
+            sprite.hideturtle()
+        sprites.clear()
         # after game has stopped, the pause/resume button should be on pause.
         pause_resume_button.clear()
         pause_resume_button.penup()
@@ -158,9 +132,9 @@ def onStartStopToggle(x, y):
     else:
         message.clearMessage()
         start_stop_button.write('Stop', align='center', font=("Courier", 18, "normal"))
-        for ball in balls:
-            ball.dx = options[randint(0,1)]
-            ball.dy = options[randint(0,1)]
+        for sprite in sprites:
+            sprite.dx = options[randint(0,1)]
+            sprite.dy = options[randint(0,1)]
     start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_Y)
     start_stop_button.toggle = not start_stop_button.toggle
     # reset summon buttons
@@ -180,16 +154,16 @@ def onPauseResumeToggle(x, y):
     pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_TEXT_Y)
     if pause_resume_button.toggle:
         pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
-        for ball in balls:
-            ball.dx = ball.prevdx
-            ball.dy = ball.prevdy
+        for sprite in sprites:
+            sprite.dx = sprite.prevdx
+            sprite.dy = sprite.prevdy
     else:
         pause_resume_button.write('Resume', align='center', font=("Courier", 18, "normal"))
-        for ball in balls:
-            ball.prevdx = ball.dx
-            ball.prevdy = ball.dy
-            ball.dx = 0
-            ball.dy = 0
+        for sprite in sprites:
+            sprite.prevdx = sprite.dx
+            sprite.prevdy = sprite.dy
+            sprite.dx = 0
+            sprite.dy = 0
     pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_Y)
     pause_resume_button.toggle = not pause_resume_button.toggle
 
@@ -222,12 +196,12 @@ def onUndoClick(x, y):
     # check if data arr is non-empty
     if start_stop_button.toggle:
         return 
-    if len(balls) < 1:
+    if len(sprites) < 1:
         message.writeMessage('Cannot Undo', wn, MESSAGE_TIMEOUT)
         return
-    ball = balls.pop()
-    ball.hideturtle()
-    copy.append(ball)
+    sprite = sprites.pop()
+    sprite.hideturtle()
+    copy.append(sprite)
      
 
 def onRedoClick(x, y):
@@ -237,43 +211,43 @@ def onRedoClick(x, y):
     if len(copy) < 1:
         message.writeMessage('Cannot Redo', wn, MESSAGE_TIMEOUT)
         return
-    ball = copy.pop()
-    ball.showturtle() 
-    balls.append(ball)
+    sprite = copy.pop()
+    sprite.showturtle() 
+    sprites.append(sprite)
 
 
 def detectCollision():
     indices = []
-    for i in range(len(balls)):
-        for j in range(i+1, len(balls)):
-            if balls[i].distance(balls[j]) < COLLISION_RADIUS:
+    for i in range(len(sprites)):
+        for j in range(i+1, len(sprites)):
+            if sprites[i].distance(sprites[j]) < COLLISION_RADIUS:
                 # collision
-                opp_sign = balls[j].sign
-                match balls[i].sign:
+                opp_sign = sprites[j].sign
+                match sprites[i].sign:
                     case 'rock':
                         if opp_sign == 'paper':
-                            balls[i].hideturtle()
+                            sprites[i].hideturtle()
                             indices.append(i) 
                         elif opp_sign == 'scissor':
-                            balls[j].hideturtle()
+                            sprites[j].hideturtle()
                             indices.append(j) 
                     case 'paper':
                         if opp_sign == 'rock':
-                            balls[j].hideturtle()
+                            sprites[j].hideturtle()
                             indices.append(j) 
                         elif opp_sign == 'scissor':
-                            balls[i].hideturtle()
+                            sprites[i].hideturtle()
                             indices.append(i) 
                     case 'scissor':
                         if opp_sign == 'rock':
-                            balls[i].hideturtle()
+                            sprites[i].hideturtle()
                             indices.append(i) 
                         elif opp_sign == 'paper':
-                            balls[j].hideturtle()
+                            sprites[j].hideturtle()
                             indices.append(j) 
-    # remove balls altogether
+    # remove sprites that got eliminated altogether
     for idx in indices:
-        balls.pop(idx)
+        sprites.pop(idx)
 
 # buttons
 start_stop_button = ControlButton('Start', 'square', 2, 3, 'purple', SS_BUTTON_X, SS_BUTTON_Y, SS_BUTTON_TEXT_Y, onStartStopToggle)
@@ -291,26 +265,26 @@ redo_button = ReverseButton('arrow', 1, 2, 'grey', REDO_BTN_X, REDO_BTN_Y, onRed
 while True:
     wn.update()
 
-    for ball in balls:
-        ball.setx(ball.xcor() + ball.dx)
-        ball.sety(ball.ycor() + ball.dy)
+    for sprite in sprites:
+        sprite.setx(sprite.xcor() + sprite.dx)
+        sprite.sety(sprite.ycor() + sprite.dy)
         # check borders
-        if ball.xcor() > RIGHT_BORDER:
-            ball.setx(RIGHT_BORDER)
-            ball.dx *= -1
-        elif ball.xcor() < LEFT_BORDER:
-            ball.setx(LEFT_BORDER)
-            ball.dx *= -1
-        if ball.ycor() > TOP_BORDER:
-            ball.sety(TOP_BORDER)
-            ball.dy *= -1
-        elif ball.ycor() < BOTTOM_BORDER:
-            ball.sety(BOTTOM_BORDER)
-            ball.dy *= -1
+        if sprite.xcor() > RIGHT_BORDER:
+            sprite.setx(RIGHT_BORDER)
+            sprite.dx *= -1
+        elif sprite.xcor() < LEFT_BORDER:
+            sprite.setx(LEFT_BORDER)
+            sprite.dx *= -1
+        if sprite.ycor() > TOP_BORDER:
+            sprite.sety(TOP_BORDER)
+            sprite.dy *= -1
+        elif sprite.ycor() < BOTTOM_BORDER:
+            sprite.sety(BOTTOM_BORDER)
+            sprite.dy *= -1
     
     detectCollision()
     
-    if len(balls) < 1 or start_stop_button.toggle:
+    if len(sprites) < 1 or start_stop_button.toggle:
         undo_button.color('grey')
     else:
         undo_button.color('black')
@@ -321,10 +295,16 @@ while True:
         redo_button.color('black')
     
     # game over
-    if start_stop_button.toggle and (len(balls) == 1 or all(b.sign == balls[0].sign for b in balls)):
-        # 
-        # TODO: Create a restart button
-        for ball in balls:
-            ball.dx = 0
-            ball.dy = 0
+    if start_stop_button.toggle and (len(sprites) == 1 or all(b.sign == sprites[0].sign for b in sprites)):
+        for sprite in sprites:
+            sprite.dx = 0
+            sprite.dy = 0
         message.gameOver()
+
+
+'''
+TODO:
+- Restart button when GAME OVER
+
+- Ideas: when sprite eats another, it gets BIGGER and FASTER
+'''

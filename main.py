@@ -1,6 +1,9 @@
 from turtle import Turtle, Screen
 from random import randint
 
+from separator import Separator
+from buttons import Button, ControlButton, ReverseButton
+
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 600
 BOARD_WIDTH = 700
@@ -16,6 +19,7 @@ RIGHT_BORDER = SCREEN_WIDTH/2 - CONTROLS_WIDTH - BALL_WIDTH/2
 LEFT_BORDER = BALL_WIDTH/2 - SCREEN_WIDTH/2
 
 MESSAGE_TIMEOUT = 1700
+
 SEPARATOR_X = 200
 SEPARATOR_Y = 300
 
@@ -23,12 +27,12 @@ MESSAGE_X = -150
 MESSAGE_Y = 200
 
 SS_BUTTON_X = 350
-SS_BUTTON_Y = 180
-SS_BUTTON_TEXT_Y = 160
+SS_BUTTON_Y = 160
+SS_BUTTON_TEXT_Y = 180
 
 PR_BUTTON_X = 350 
-PR_BUTTON_Y = 110
-PR_BUTTON_TEXT_Y = 90
+PR_BUTTON_Y = 90
+PR_BUTTON_TEXT_Y = 110
 
 SUMMON_BTN_SIZE = 2.1
 SUMMON_BTN_HOVER = 2.5
@@ -124,16 +128,8 @@ wn.onclick(onWindowClick)
 wn.selected = None
 wn._root.resizable(False, False)
  
-# draw a line for controls panel
-separator = Turtle()
-separator.color('black')
-separator.width(4)
-separator.hideturtle()
-separator.penup()
-separator.goto(SEPARATOR_X, SEPARATOR_Y)
-separator.pendown()
-separator.right(90)
-separator.forward(600)
+# separator component to divide game board and controls
+separator = Separator(SEPARATOR_X, SEPARATOR_Y, 'yellow', 4, SCREEN_HEIGHT)
 
 
 message = Turtle()
@@ -152,7 +148,7 @@ def onStartStopToggle(x, y):
         return
     start_stop_button.clear()
     start_stop_button.penup()
-    start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_Y)
+    start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_TEXT_Y)
     if start_stop_button.started:
         start_stop_button.write('Start', align='center', font=("Courier", 18, "normal"))
         for ball in balls:
@@ -161,17 +157,18 @@ def onStartStopToggle(x, y):
         # after game has stopped, the pause/resume button should be on pause.
         pause_resume_button.clear()
         pause_resume_button.penup()
-        pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_Y)
-        pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
         pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_TEXT_Y)
+        pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
+        pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_Y)
         pause_resume_button.paused = False
 
     else:
+        message.clear()
         start_stop_button.write('Stop', align='center', font=("Courier", 18, "normal"))
         for ball in balls:
             ball.dx = options[randint(0,1)]
             ball.dy = options[randint(0,1)]
-    start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_TEXT_Y)
+    start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_Y)
     start_stop_button.started = not start_stop_button.started
     # reset summon buttons
     wn.selected = None
@@ -189,7 +186,7 @@ def onPauseResumeToggle(x, y):
         return
     pause_resume_button.clear()
     pause_resume_button.penup()
-    pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_Y)
+    pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_TEXT_Y)
     if pause_resume_button.paused:
         pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
         for ball in balls:
@@ -202,7 +199,7 @@ def onPauseResumeToggle(x, y):
             ball.prevdy = ball.dy
             ball.dx = 0
             ball.dy = 0
-    pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_TEXT_Y)
+    pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_Y)
     pause_resume_button.paused = not pause_resume_button.paused
 
 def summon_rock(x, y):
@@ -296,9 +293,9 @@ start_stop_button.shape('square')
 start_stop_button.shapesize(2, 3)
 start_stop_button.color('purple')
 start_stop_button.penup()
-start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_Y)
-start_stop_button.write('Start', align='center', font=("Courier", 18, "normal"))
 start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_TEXT_Y)
+start_stop_button.write('Start', align='center', font=("Courier", 18, "normal"))
+start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_Y)
 start_stop_button.started = False
 start_stop_button.onclick(onStartStopToggle)
 
@@ -308,9 +305,9 @@ pause_resume_button.shape('square')
 pause_resume_button.shapesize(2, 3)
 pause_resume_button.color('#624a2e')
 pause_resume_button.penup()
-pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_Y)
-pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
 pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_TEXT_Y)
+pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
+pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_Y)
 pause_resume_button.paused = False
 pause_resume_button.onclick(onPauseResumeToggle)
 
@@ -346,7 +343,6 @@ undo_button.shape('arrow')
 undo_button.shapesize(1, 2)
 undo_button.width(5)
 undo_button.right(180)
-undo_button.shapesize()
 undo_button.color('grey')
 undo_button.penup()
 undo_button.goto(UNDO_BTN_X, UNDO_BTN_Y)
@@ -359,7 +355,6 @@ redo_button = Turtle()
 redo_button.shape('arrow')
 redo_button.shapesize(1, 2)
 redo_button.width(5)
-redo_button.shapesize()
 redo_button.color('grey')
 redo_button.penup()
 redo_button.goto(REDO_BTN_X, REDO_BTN_Y)

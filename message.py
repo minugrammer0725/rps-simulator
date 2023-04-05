@@ -19,3 +19,5 @@ class Message(Turtle):
     def gameOver(self):
         self.clear
         self.write('Game Over!', align='center', font=('Courier', 18, 'normal'))
+
+        

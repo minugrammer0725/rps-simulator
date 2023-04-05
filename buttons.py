@@ -9,6 +9,14 @@ class Button(Turtle):
         self.penup()
         self.goto(x, y)
 
+    def setSize(self, wid, len):
+        self.shapesize(wid, len)
+
+    def moveButton(self, x, y):
+        self.goto(x, y)
+        
+    def setColor(self, color):
+        self.color(color)
 
 class ControlButton(Button):
     def __init__(self, label, shape, wid, len, color, x, y, label_y, onclick):
@@ -17,8 +25,29 @@ class ControlButton(Button):
         self.goto(x, label_y)
         self.write(f'{label}', align='center', font=("Courier", 18, "normal"))
         self.goto(x, y)
+    
+    def isActive(self):
+        return self.toggle 
+    
+    def clearPen(self, x, y):
+        self.clear()
+        self.penup()
+        self.goto(x, y) 
 
-        
+    def updateLabel(self, label):
+        self.write(f'{label}', align='center', font=("Courier", 18, "normal")) 
+
+    def resetToPause(self, x, y, label_y):
+        self.clearPen(x, label_y)
+        self.updateLabel('Pause')
+        self.write('Pause', align='center', font=("Courier", 18, "normal"))
+        self.goto(x, y)
+        self.toggle = False
+
+    def toggleStatus(self):
+        self.toggle = not self.toggle
+
+
 class ReverseButton(Button):
     def __init__(self, shape, wid, len, color, x, y, onclick, angle, width):
         super().__init__(shape, wid, len, color, x, y, onclick)
@@ -26,4 +55,5 @@ class ReverseButton(Button):
         self.pendown()
         self.right(angle)
         self.forward(20) 
+
 

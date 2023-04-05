@@ -1,4 +1,4 @@
-from turtle import Turtle, Screen
+from turtle import Screen
 from random import randint
 
 from separator import Separator
@@ -6,6 +6,7 @@ from message import Message
 from sprite import Sprite
 from buttons import Button, ControlButton, ReverseButton
 
+# Constants
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 600
 BOARD_WIDTH = 700
@@ -55,15 +56,51 @@ REDO_BTN_Y = -50
 sprites = []
 # copy array used for undo/redo
 copy = []
-
 # intial dx, dy values
 options = [INIT_SPEED, -INIT_SPEED]
 
+# helper functions
+def canStart():
+    if len(sprites) < 2 or notEnoughUniqueItems():
+        return False
+    return True
+
+def notEnoughUniqueItems():
+    sign = sprites[0].getSign()
+    count = 0
+    for sprite in sprites:
+        if sign == sprite.getSign():
+            count += 1
+    return True if count == len(sprites)  else False
+
+def moveSprites():
+    for sprite in sprites:
+        sprite.moveSprite()
+        sprite.checkBorders(TOP_BORDER, BOTTOM_BORDER, RIGHT_BORDER, LEFT_BORDER)
+
+def checkUndoRedo():
+    if len(sprites) < 1 or start_stop_button.isActive():
+        undo_button.setColor('grey')
+    else:
+        undo_button.setColor('black')
+
+    if len(copy) < 1 or start_stop_button.isActive():
+        redo_button.setColor('grey')
+    else:
+        redo_button.setColor('black')
+
+def isGameOver():
+    if start_stop_button.isActive() and (len(sprites) == 1 or all(b.getSign() == sprites[0].getSign() for b in sprites)):
+        for sprite in sprites:
+            sprite.setDx(0)
+            sprite.setDy(0)
+        message.gameOver()
+
+# click events
 def onWindowClick(x, y):
     # if (x, y) is within board borders, summon a sprite
-    if not(LEFT_BORDER <= x <= RIGHT_BORDER and BOTTOM_BORDER <= y <= TOP_BORDER and not start_stop_button.toggle):
+    if not(LEFT_BORDER<= x <=RIGHT_BORDER and BOTTOM_BORDER <= y <= TOP_BORDER and not start_stop_button.isActive()):
         return
-
     # python match: 3.10 >
     match wn.selected:
         case 'rock':
@@ -78,20 +115,145 @@ def onWindowClick(x, y):
         case _:
             message.writeMessage('Please Select a Color', wn, MESSAGE_TIMEOUT)
 
-def canStart():
-    if len(sprites) < 2 or notEnoughUniqueItems():
-        return False
-    return True
 
-def notEnoughUniqueItems():
-    sign = sprites[0].sign
-    count = 0
-    for sprite in sprites:
-        if sign == sprite.sign:
-            count += 1
-    return True if count == len(sprites)  else False
+def onStartStopToggle(x, y):
+    if not canStart():
+        message.writeMessage('Summon at least 2 different items', wn, MESSAGE_TIMEOUT)
+        return
+    
+    start_stop_button.clearPen(SS_BUTTON_X, SS_BUTTON_TEXT_Y)
+
+    # start_stop_button.clear()
+    # start_stop_button.penup()
+    # start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_TEXT_Y)
+    if start_stop_button.isActive():
+        # start_stop_button.write('Start', align='center', font=("Courier", 18, "normal"))
+        start_stop_button.updateLabel('Start')
+        for sprite in sprites:
+            sprite.hideSprite()
+        sprites.clear()
+        # after game has stopped, the pause/resume button should be on pause.
+        pause_resume_button.resetToPause(PR_BUTTON_X, PR_BUTTON_Y, PR_BUTTON_TEXT_Y)
+
+    else:
+        message.clearMessage()
+        start_stop_button.updateLabel('Stop')
+        for sprite in sprites:
+            sprite.setDx(options[randint(0,1)])
+            sprite.setDy(options[randint(0,1)])
+    start_stop_button.moveButton(SS_BUTTON_X, SS_BUTTON_Y)
+    start_stop_button.toggleStatus()
+    # reset summon buttons
+    wn.selected = None
+    rock_button.setSize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
+    paper_button.setSize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
+    scissor_button.setSize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
+    # empty copy array
+    copy.clear()
+
+def onPauseResumeToggle(x, y):
+    if not start_stop_button.isActive():
+        message.writeMessage('Game has not started yet', wn, MESSAGE_TIMEOUT)
+        return
+    pause_resume_button.clearPen(PR_BUTTON_X, PR_BUTTON_TEXT_Y)
+    if pause_resume_button.isActive():
+        pause_resume_button.updateLabel('Pause')
+        for sprite in sprites:
+            sprite.setDx(sprite.getPrevDx())
+            sprite.setDy(sprite.getPrevDy())
+    else:
+        pause_resume_button.updateLabel('Resume')
+        for sprite in sprites:
+            sprite.setPrevDx(sprite.getDx())
+            sprite.setPrevDy(sprite.getDy())
+            sprite.setDx(0)
+            sprite.setDy(0)
+    pause_resume_button.moveButton(PR_BUTTON_X, PR_BUTTON_Y)
+    pause_resume_button.toggleStatus()
+
+def summon_rock(x, y):
+    if start_stop_button.isActive():
+        return
+    wn.selected = 'rock'
+    rock_button.setSize(SUMMON_BTN_HOVER, SUMMON_BTN_HOVER)
+    paper_button.setSize(SUMMON_BTN_SIZE,SUMMON_BTN_SIZE)
+    scissor_button.setSize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
+
+def summon_paper(x, y):
+    if start_stop_button.isActive():
+        return
+    wn.selected = 'paper'
+    rock_button.setSize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
+    paper_button.setSize(SUMMON_BTN_HOVER,SUMMON_BTN_HOVER)
+    scissor_button.setSize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
+
+def summon_scissor(x, y):
+    if start_stop_button.isActive():
+        return
+    wn.selected = 'scissor'
+    rock_button.setSize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
+    paper_button.setSize(SUMMON_BTN_SIZE,SUMMON_BTN_SIZE)
+    scissor_button.setSize(SUMMON_BTN_HOVER, SUMMON_BTN_HOVER)
 
 
+def onUndoClick(x, y):
+    # check if data arr is non-empty
+    if start_stop_button.isActive():
+        return 
+    if len(sprites) < 1:
+        message.writeMessage('Cannot Undo', wn, MESSAGE_TIMEOUT)
+        return
+    sprite = sprites.pop()
+    sprite.hideSprite()
+    copy.append(sprite)
+     
+
+def onRedoClick(x, y):
+    # check if copy arr is non-empty
+    if start_stop_button.isActive():
+        return 
+    if len(copy) < 1:
+        message.writeMessage('Cannot Redo', wn, MESSAGE_TIMEOUT)
+        return
+    sprite = copy.pop()
+    sprite.showSprite()
+    sprites.append(sprite)
+
+# collision detection
+def detectCollision():
+    indices = []
+    for i in range(len(sprites)):
+        for j in range(i+1, len(sprites)):
+            if sprites[i].distance(sprites[j]) < COLLISION_RADIUS:
+                opp_sign = sprites[j].getSign()
+                match sprites[i].getSign():
+                    case 'rock':
+                        if opp_sign == 'paper':
+                            sprites[i].hideSprite()
+                            indices.append(i) 
+                        elif opp_sign == 'scissor':
+                            sprites[j].hideSprite()
+                            indices.append(j) 
+                    case 'paper':
+                        if opp_sign == 'rock':
+                            sprites[j].hideSprite()
+                            indices.append(j) 
+                        elif opp_sign == 'scissor':
+                            sprites[i].hideSprite()
+                            indices.append(i) 
+                    case 'scissor':
+                        if opp_sign == 'rock':
+                            sprites[i].hideSprite()
+                            indices.append(i) 
+                        elif opp_sign == 'paper':
+                            sprites[j].hideSprite()
+                            indices.append(j) 
+    # remove sprites that got eliminated altogether
+    for idx in indices:
+        sprites.pop(idx)
+
+
+# main window
 wn = Screen()
 wn.title('RPS-Simulator')
 wn.setup(width=SCREEN_WIDTH, height=SCREEN_HEIGHT)
@@ -106,148 +268,6 @@ wn._root.resizable(False, False)
 separator = Separator(SEPARATOR_X, SEPARATOR_Y, 'yellow', 4, SCREEN_HEIGHT)
 # message component to alert user
 message = Message(0, MESSAGE_X, MESSAGE_Y)
-
-
-# click events
-def onStartStopToggle(x, y):
-    if not canStart():
-        message.writeMessage('Summon at least 2 different items', wn, MESSAGE_TIMEOUT)
-        return
-    start_stop_button.clear()
-    start_stop_button.penup()
-    start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_TEXT_Y)
-    if start_stop_button.toggle:
-        start_stop_button.write('Start', align='center', font=("Courier", 18, "normal"))
-        for sprite in sprites:
-            sprite.hideturtle()
-        sprites.clear()
-        # after game has stopped, the pause/resume button should be on pause.
-        pause_resume_button.clear()
-        pause_resume_button.penup()
-        pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_TEXT_Y)
-        pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
-        pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_Y)
-        pause_resume_button.toggle = False
-
-    else:
-        message.clearMessage()
-        start_stop_button.write('Stop', align='center', font=("Courier", 18, "normal"))
-        for sprite in sprites:
-            sprite.dx = options[randint(0,1)]
-            sprite.dy = options[randint(0,1)]
-    start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_Y)
-    start_stop_button.toggle = not start_stop_button.toggle
-    # reset summon buttons
-    wn.selected = None
-    rock_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
-    paper_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
-    scissor_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
-    # empty copy array
-    copy.clear()
-
-def onPauseResumeToggle(x, y):
-    if not start_stop_button.toggle:
-        message.writeMessage('Game has not started yet', wn, MESSAGE_TIMEOUT)
-        return
-    pause_resume_button.clear()
-    pause_resume_button.penup()
-    pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_TEXT_Y)
-    if pause_resume_button.toggle:
-        pause_resume_button.write('Pause', align='center', font=("Courier", 18, "normal"))
-        for sprite in sprites:
-            sprite.dx = sprite.prevdx
-            sprite.dy = sprite.prevdy
-    else:
-        pause_resume_button.write('Resume', align='center', font=("Courier", 18, "normal"))
-        for sprite in sprites:
-            sprite.prevdx = sprite.dx
-            sprite.prevdy = sprite.dy
-            sprite.dx = 0
-            sprite.dy = 0
-    pause_resume_button.goto(PR_BUTTON_X, PR_BUTTON_Y)
-    pause_resume_button.toggle = not pause_resume_button.toggle
-
-def summon_rock(x, y):
-    if start_stop_button.toggle:
-        return
-    wn.selected = 'rock'
-    rock_button.shapesize(SUMMON_BTN_HOVER, SUMMON_BTN_HOVER)
-    paper_button.shapesize(SUMMON_BTN_SIZE,SUMMON_BTN_SIZE)
-    scissor_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
-
-def summon_paper(x, y):
-    if start_stop_button.toggle:
-        return
-    wn.selected = 'paper'
-    rock_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
-    paper_button.shapesize(SUMMON_BTN_HOVER,SUMMON_BTN_HOVER)
-    scissor_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
-
-def summon_scissor(x, y):
-    if start_stop_button.toggle:
-        return
-    wn.selected = 'scissor'
-    rock_button.shapesize(SUMMON_BTN_SIZE, SUMMON_BTN_SIZE)
-    paper_button.shapesize(SUMMON_BTN_SIZE,SUMMON_BTN_SIZE)
-    scissor_button.shapesize(SUMMON_BTN_HOVER, SUMMON_BTN_HOVER)
-
-
-def onUndoClick(x, y):
-    # check if data arr is non-empty
-    if start_stop_button.toggle:
-        return 
-    if len(sprites) < 1:
-        message.writeMessage('Cannot Undo', wn, MESSAGE_TIMEOUT)
-        return
-    sprite = sprites.pop()
-    sprite.hideturtle()
-    copy.append(sprite)
-     
-
-def onRedoClick(x, y):
-    # check if copy arr is non-empty
-    if start_stop_button.toggle:
-        return 
-    if len(copy) < 1:
-        message.writeMessage('Cannot Redo', wn, MESSAGE_TIMEOUT)
-        return
-    sprite = copy.pop()
-    sprite.showturtle() 
-    sprites.append(sprite)
-
-
-def detectCollision():
-    indices = []
-    for i in range(len(sprites)):
-        for j in range(i+1, len(sprites)):
-            if sprites[i].distance(sprites[j]) < COLLISION_RADIUS:
-                # collision
-                opp_sign = sprites[j].sign
-                match sprites[i].sign:
-                    case 'rock':
-                        if opp_sign == 'paper':
-                            sprites[i].hideturtle()
-                            indices.append(i) 
-                        elif opp_sign == 'scissor':
-                            sprites[j].hideturtle()
-                            indices.append(j) 
-                    case 'paper':
-                        if opp_sign == 'rock':
-                            sprites[j].hideturtle()
-                            indices.append(j) 
-                        elif opp_sign == 'scissor':
-                            sprites[i].hideturtle()
-                            indices.append(i) 
-                    case 'scissor':
-                        if opp_sign == 'rock':
-                            sprites[i].hideturtle()
-                            indices.append(i) 
-                        elif opp_sign == 'paper':
-                            sprites[j].hideturtle()
-                            indices.append(j) 
-    # remove sprites that got eliminated altogether
-    for idx in indices:
-        sprites.pop(idx)
 
 # buttons
 start_stop_button = ControlButton('Start', 'square', 2, 3, 'purple', SS_BUTTON_X, SS_BUTTON_Y, SS_BUTTON_TEXT_Y, onStartStopToggle)
@@ -265,41 +285,13 @@ redo_button = ReverseButton('arrow', 1, 2, 'grey', REDO_BTN_X, REDO_BTN_Y, onRed
 while True:
     wn.update()
 
-    for sprite in sprites:
-        sprite.setx(sprite.xcor() + sprite.dx)
-        sprite.sety(sprite.ycor() + sprite.dy)
-        # check borders
-        if sprite.xcor() > RIGHT_BORDER:
-            sprite.setx(RIGHT_BORDER)
-            sprite.dx *= -1
-        elif sprite.xcor() < LEFT_BORDER:
-            sprite.setx(LEFT_BORDER)
-            sprite.dx *= -1
-        if sprite.ycor() > TOP_BORDER:
-            sprite.sety(TOP_BORDER)
-            sprite.dy *= -1
-        elif sprite.ycor() < BOTTOM_BORDER:
-            sprite.sety(BOTTOM_BORDER)
-            sprite.dy *= -1
+    moveSprites()
     
     detectCollision()
     
-    if len(sprites) < 1 or start_stop_button.toggle:
-        undo_button.color('grey')
-    else:
-        undo_button.color('black')
-
-    if len(copy) < 1 or start_stop_button.toggle:
-        redo_button.color('grey')
-    else:
-        redo_button.color('black')
+    checkUndoRedo()
     
-    # game over
-    if start_stop_button.toggle and (len(sprites) == 1 or all(b.sign == sprites[0].sign for b in sprites)):
-        for sprite in sprites:
-            sprite.dx = 0
-            sprite.dy = 0
-        message.gameOver()
+    isGameOver()
 
 
 '''

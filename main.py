@@ -4,7 +4,7 @@ from random import randint
 from separator import Separator
 from message import Message
 from sprite import Sprite
-from buttons import Button, ControlButton, ReverseButton
+from buttons import Button, ControlButton, ReverseButton, RestartButton
 
 # Constants
 SCREEN_WIDTH = 1000
@@ -21,11 +21,10 @@ BOTTOM_BORDER = SPRITE_WIDTH/2 - SCREEN_HEIGHT/2
 RIGHT_BORDER = SCREEN_WIDTH/2 - CONTROLS_WIDTH - SPRITE_WIDTH/2
 LEFT_BORDER = SPRITE_WIDTH/2 - SCREEN_WIDTH/2
 
-MESSAGE_TIMEOUT = 1700
-
 SEPARATOR_X = 200
 SEPARATOR_Y = 300
 
+MESSAGE_TIMEOUT = 1700
 MESSAGE_X = -150
 MESSAGE_Y = 200
 
@@ -50,6 +49,10 @@ UNDO_BTN_Y = -50
 
 REDO_BTN_X = 370
 REDO_BTN_Y = -50
+
+RE_BTN_X = -150
+RE_BTN_Y = 80
+RE_BTN_TEXT_Y = 100
 
 
 # all sprites on the screen
@@ -95,6 +98,7 @@ def isGameOver():
             sprite.setDx(0)
             sprite.setDy(0)
         message.gameOver()
+        restart_button.restart()
 
 # click events
 def onWindowClick(x, y):
@@ -122,12 +126,7 @@ def onStartStopToggle(x, y):
         return
     
     start_stop_button.clearPen(SS_BUTTON_X, SS_BUTTON_TEXT_Y)
-
-    # start_stop_button.clear()
-    # start_stop_button.penup()
-    # start_stop_button.goto(SS_BUTTON_X, SS_BUTTON_TEXT_Y)
     if start_stop_button.isActive():
-        # start_stop_button.write('Start', align='center', font=("Courier", 18, "normal"))
         start_stop_button.updateLabel('Start')
         for sprite in sprites:
             sprite.hideSprite()
@@ -219,6 +218,17 @@ def onRedoClick(x, y):
     sprite.showSprite()
     sprites.append(sprite)
 
+def onRestart(x, y):
+    for sprite in sprites:
+        sprite.hideSprite()
+    sprites.clear()
+    copy.clear()
+
+    start_stop_button.toggleStatus()
+    restart_button.removeButton()
+
+
+    
 # collision detection
 def detectCollision():
     indices = []
@@ -253,7 +263,7 @@ def detectCollision():
         sprites.pop(idx)
 
 
-# main window
+# singleton window object
 wn = Screen()
 wn.title('RPS-Simulator')
 wn.setup(width=SCREEN_WIDTH, height=SCREEN_HEIGHT)
@@ -263,7 +273,7 @@ wn.listen()
 wn.onclick(onWindowClick)
 wn.selected = None
 wn._root.resizable(False, False)
- 
+
 # separator component to divide game board and controls
 separator = Separator(SEPARATOR_X, SEPARATOR_Y, 'yellow', 4, SCREEN_HEIGHT)
 # message component to alert user
@@ -280,6 +290,7 @@ scissor_button = Button('triangle', SUMMON_BTN_SIZE, SUMMON_BTN_SIZE, 'blue', SC
 undo_button = ReverseButton('arrow', 1, 2, 'grey', UNDO_BTN_X, UNDO_BTN_Y, onUndoClick, 180, 5)
 redo_button = ReverseButton('arrow', 1, 2, 'grey', REDO_BTN_X, REDO_BTN_Y, onRedoClick, 0, 5)
 
+restart_button = RestartButton('Restart', 'square', 2, 3, 'gold', RE_BTN_X, RE_BTN_Y, RE_BTN_TEXT_Y, onRestart)
 
 # game loop
 while True:

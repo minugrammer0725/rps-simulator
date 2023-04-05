@@ -56,4 +56,22 @@ class ReverseButton(Button):
         self.right(angle)
         self.forward(20) 
 
+class RestartButton(Button):
+    def __init__(self, label, shape, wid, len, color, x, y, label_y, onclick):
+        super().__init__(shape, wid, len, color, x, y, onclick)
+        self.hideturtle()
+        self.label = label
+        self.x = x
+        self.y = y
+        self.label_y = label_y 
+
+    def restart(self):
+        self.goto(self.x, self.label_y)
+        self.write(f'{self.label}', align='center', font=("Courier", 18, "normal"))
+        self.goto(self.x, self.y)
+        self.showturtle()
+    
+    def removeButton(self):
+        self.clear()
+        self.hideturtle()
 
